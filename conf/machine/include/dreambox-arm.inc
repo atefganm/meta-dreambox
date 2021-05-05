@@ -19,7 +19,6 @@ PACKAGECONFIG_pn-cogl-1.0 = "egl-kms egl-null \
 
 PACKAGECONFIG_pn-weston = "${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'gles', '', d)}"
 
-
 GLIBC_EXTRA_OECONF = "--with-tls --with-__thread"
 
 DVBMEDIASINK_CONFIG = "--with-pcm --with-wma --with-wmv --with-dts=no --with-dtsdownmix --with-eac3 --with-vb6 --with-vb8 --with-vb9 --with-spark --with-h265"
@@ -38,17 +37,16 @@ MACHINE_ESSENTIAL_EXTRA_RDEPENDS += "\
 	kernel-module-snd-pcm-oss \
 	"
 
-DISTRO_FEATURES_remove += "directfb gtk-directfb"
     
-MACHINE_FEATURES += "dreambox alsa usbhost switchoff blindscan-dvbs modem dvb-c blindscan-dvbc hdmicec recovery ci dvd usbconsole blindscan-tbs emmc mmc HDMI HDMI-IN-FHD"
+MACHINE_FEATURES += "dreambox alsa usbhost switchoff blindscan-dvbs modem dvb-c blindscan-dvbc hdmicec recovery ci usbconsole blindscan-tbs emmc mmc HDMI HDMI-IN-FHD"
 
 PREFERRED_PROVIDER_virtual/kernel = "linux-dreambox"
 PREFERRED_PROVIDER_virtual/blindscan-dvbs = "dreambox-blindscan-utils"
 PREFERRED_PROVIDER_virtual/blindscan-dvbc = "dreambox-blindscan-utils"
 PREFERRED_VERSION_linux-dreambox = "${KERNELVERSION}"
-PREFERRED_PROVIDER_virtual/egl = "libvc5dream"
-PREFERRED_PROVIDER_virtual/libgles1 = "libvc5dream"
-PREFERRED_PROVIDER_virtual/libgles2 = "libvc5dream"
+PREFERRED_PROVIDER_virtual/egl ?= "libvc5dream"
+PREFERRED_PROVIDER_virtual/libgles1 ?= "libvc5dream"
+PREFERRED_PROVIDER_virtual/libgles2 ?= "libvc5dream"
 PREFERRED_PROVIDER_virtual/libgl ?= "mesa-gl"
 PREFERRED_PROVIDER_virtual/mesa ?= "mesa-gl"
 
@@ -88,3 +86,5 @@ SOC_FAMILY = "bcm7252s"
 RCNAME = "dmm2"
 
 KERNEL_MODULE_AUTOLOAD += "bluetooth"
+
+KODIEXTSETTINGS = ""
