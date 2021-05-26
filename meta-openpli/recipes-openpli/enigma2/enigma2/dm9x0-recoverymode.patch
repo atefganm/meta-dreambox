@@ -1,0 +1,106 @@
+From 3f700436be24b7ec7fde1a842d6b0012e880025e Mon Sep 17 00:00:00 2001
+From: atefganm <atef_anim_1974@yahoo.com>
+Date: Sat, 1 May 2021 19:43:51 +0200
+Subject: [PATCH] dm-recoverymode
+
+---
+ data/menu.xml                       | 1 +
+ lib/python/Components/Lcd.py        | 8 +++++++-
+ lib/python/Components/SystemInfo.py | 1 +
+ lib/python/Screens/Standby.py       | 3 +++
+ tools/enigma2.sh.in                 | 4 ++++
+ 5 files changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/data/menu.xml b/data/menu.xml
+index 897db65..b0cf84d 100644
+--- a/data/menu.xml
++++ b/data/menu.xml
+@@ -96,5 +96,6 @@
+ 			<item text="Multiboot image selector" entryID="multiboot" requires="canMultiBoot"><screen module="FlashImage" screen="MultibootSelection">1</screen></item>
+ 			<item text="Deep standby" requires="DeepstandbySupport" entryID="deep_standby"><screen module="Standby" screen="TryQuitMainloop">1</screen></item>
+ 			<item text="Shutdown" requires="!DeepstandbySupport" entryID="deep_standby"><screen module="Standby" screen="TryQuitMainloop">1</screen></item>
++ 			<item entryID="maintenance_mode" level="0" text="Recovery Mode" weight="55" requires="RecoveryMode"><screen module="Standby" screen="TryQuitMainloop">16</screen></item>
+ 		</menu>
+ </menu>
+diff --git a/lib/python/Components/Lcd.py b/lib/python/Components/Lcd.py
+index 02232a9..864246e 100644
+--- a/lib/python/Components/Lcd.py
++++ b/lib/python/Components/Lcd.py
+@@ -3,6 +3,9 @@ from enigma import eDBoxLCD
+ from Components.SystemInfo import SystemInfo
+ from Screens.InfoBar import InfoBar
+ from Screens.Screen import Screen
++from enigma import getBoxType
++
++model = getBoxType()
+ 
+ 
+ class dummyScreen(Screen):
+@@ -80,7 +83,10 @@ def InitLcd():
+ 			config.lcd.contrast.addNotifier(setLCDcontrast)
+ 		else:
+ 			config.lcd.contrast = ConfigNothing()
+-			standby_default = 1
++			if getBoxType() in ('dm900','dm920'):
++				standby_default = 4
++			else:
++				standby_default = 1
+ 
+ 		config.lcd.standby = ConfigSlider(default=standby_default, limits=(0, 10))
+ 		config.lcd.standby.addNotifier(setLCDbright)
+diff --git a/lib/python/Components/SystemInfo.py b/lib/python/Components/SystemInfo.py
+index 16507c2..25c6b8a 100644
+--- a/lib/python/Components/SystemInfo.py
++++ b/lib/python/Components/SystemInfo.py
+@@ -133,4 +133,5 @@ SystemInfo["CanDownmixAAC"] = fileHas("/proc/stb/audio/aac_choices", "downmix")
+ SystemInfo["HDMIAudioSource"] = fileCheck("/proc/stb/hdmi/audio_source")
+ SystemInfo["BootDevice"] = getBootdevice()
+ SystemInfo["FbcTunerPowerAlwaysOn"] = model in ("vusolo4k", "vuduo4k", "vuduo4kse", "vuultimo4k", "vuuno4k", "vuuno4kse", "gbquad4k", "gbue4k")
++SystemInfo["RecoveryMode"] = fileCheck("/proc/stb/fp/boot_mode")
+ SystemInfo["HasPhysicalLoopthrough"] = ["Vuplus DVB-S NIM(AVL2108)", "GIGA DVB-S2 NIM (Internal)"]
+diff --git a/lib/python/Screens/Standby.py b/lib/python/Screens/Standby.py
+index 587a2a6..b10e2c0 100644
+--- a/lib/python/Screens/Standby.py
++++ b/lib/python/Screens/Standby.py
+@@ -30,6 +30,7 @@ QUIT_MANUFACTURER_RESET = 7
+ QUIT_MAINT = 16
+ QUIT_UPGRADE_PROGRAM = 42
+ QUIT_IMAGE_RESTORE = 43
++QUIT_RRECVERY_MODE = 45
+ 
+ 
+ def isInfoBarInstance():
+@@ -253,6 +254,7 @@ class QuitMainloopScreen(Screen):
+ 			QUIT_RESTART: _("The user interface of your receiver is restarting"),
+ 			QUIT_UPGRADE_FP: _("Your frontprocessor will be updated\nPlease wait until your receiver reboots\nThis may take a few minutes"),
+ 			QUIT_DEBUG_RESTART: _("The user interface of your receiver is restarting in debug mode"),
++			QUIT_RRECVERY_MODE: _("Your receiver is rebooting into Recovery Mode"),
+ 			QUIT_UPGRADE_PROGRAM: _("Unattended update in progress\nPlease wait until your receiver reboots\nThis may take a few minutes"),
+ 			QUIT_MANUFACTURER_RESET: _("Manufacturer reset in progress\nPlease wait until enigma2 restarts")
+ 		}.get(retvalue)
+@@ -298,6 +300,7 @@ class TryQuitMainloop(MessageBox):
+ 				QUIT_RESTART: _("Really restart now?"),
+ 				QUIT_UPGRADE_FP: _("Really update the frontprocessor and reboot now?"),
+ 				QUIT_DEBUG_RESTART: _("Really restart in debug mode now?"),
++				QUIT_RRECVERY_MODE: _("Really reboot into Recovery Mode?"),
+ 				QUIT_UPGRADE_PROGRAM: _("Really update your settop box and reboot now?"),
+ 				QUIT_MANUFACTURER_RESET: _("Really perform a manufacturer reset now?")
+ 			}.get(retvalue, None)
+diff --git a/tools/enigma2.sh.in b/tools/enigma2.sh.in
+index a3b0744..fb4fcab 100755
+--- a/tools/enigma2.sh.in
++++ b/tools/enigma2.sh.in
+@@ -91,6 +91,10 @@ while : ; do
+ 		6)
+ 			DEBUG_LVL=4
+ 			;;
++		16)
++		        echo "rescue" > /proc/stb/fp/boot_mode
++			/sbin/reboot
++			;;
+ 		7)
+ 			rm -R /etc/enigma2
+ 			;;
+-- 
+2.25.1
+
