@@ -1,17 +1,21 @@
 SUMMARY = "Dreambox EGL and GLES2 libraries"
 LICENSE = "CLOSED"
 DEPENDS = "${LIBEGLDEP}"
-PROVIDES = "virtual/egl virtual/libgles2"
-RPROVIDES_${PN} = "virtual/egl virtual/libgles2"
+PROVIDES = "virtual/egl virtual/libgles1 virtual/libgles2"
+RPROVIDES_${PN} = "virtual/egl virtual/libgles1 virtual/libgles2"
 
 LIBEGLDEP = ""
-LIBEGLDEP_bcm73625 = "libv3ddriver"
-LIBEGLDEP_bcm7435 = "libv3ddriver"
-LIBEGLDEP_bcm7252s = "libvc5driver"
+LIBEGLDEP_dm520 = "libv3ddriver"
+LIBEGLDEP_dm820 = "libv3ddriver"
+LIBEGLDEP_dm7080 = "libv3ddriver"
+LIBEGLDEP_dm900 = "libvc5driver"
+LIBEGLDEP_dm920 = "libvc5driver"
 
 LIBEGLRDEP = ""
-LIBEGLRDEP_bcm7435 = "libv3ddriver"
-LIBEGLRDEP_bcm7252s = "libvc5driver"
+LIBEGLRDEP_dm820 = "libv3ddriver"
+LIBEGLRDEP_dm7080 = "libv3ddriver"
+LIBEGLRDEP_dm900 = "libvc5driver"
+LIBEGLRDEP_dm920 = "libvc5driver"
 
 RDEPENDS_${PN} = "${LIBEGLRDEP}"
 
@@ -28,3 +32,4 @@ RREPLACES_${PN}-dev = "libegl-dev libgles2-dev"
 # until all users were recompiled.
 FILES_${PN} += "${libdir}/lib*${SOLIBSDEV}"
 FILES_SOLIBSDEV = ""
+INSANE_SKIP_${PN} += "already-stripped dev-so ldflags"
